@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id                      Int                       @id @default(autoincrement())
+  name                    String
+  active                  Boolean                   @default(true)
+  users                   User[]
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime?                 @updatedAt
+  ChatInterviewSimulation ChatInterviewSimulation[]
+
+  @@map("tb_companies")
+}
+
+model User {
+  id                      Int                       @id @default(autoincrement())
+  cognitoId               String                    @unique @map("cognito_id")
+  email                   String                    @unique
+  name                    String
+  firstName               String?                   @map("first_name")
+  lastName                String?                   @map("last_name")
+  phoneNumber             String?                   @map("phone_number")
+  role                    Role                      @default(USER)
+  companyId               Int                       @map("company_id")
+  company                 Company                   @relation(fields: [companyId], references: [id])
+  createdAt               DateTime                  @default(now()) @map("created_at")
+  updatedAt               DateTime?                 @updatedAt @map("updated_at")
+  ChatInterviewSimulation ChatInterviewSimulation[]
+
+  @@map("tb_users")
+}
+
+enum Role {
+  ADMIN
+  USER
+
+  @@map("tb_roles")
+}
+
+enum ChatInterviewSimulationStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+
+  @@map("tb_chat_interview_simulation_status")
+}
+
+model ChatInterviewSimulation {
+  id             Int    @id @default(autoincrement())
+  interviewCode  String @unique @map("interview_code")
+  interviewToken String @unique @map("interview_token")
+
+  title           String
+  description     String?
+  targetUserEmail String  @map("target_user_email")
+
+  startedAt   DateTime?                     @map("started_at")
+  completedAt DateTime?                     @map("completed_at")
+  status      ChatInterviewSimulationStatus @default(PENDING)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  creatorId Int     @map("creator_id")
+  creator   User    @relation(fields: [creatorId], references: [id])
+  companyId Int     @map("company_id")
+  company   Company @relation(fields: [companyId], references: [id])
+
+  @@map("tb_chat_interview_simulations")
+}
