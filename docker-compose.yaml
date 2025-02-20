@@ -3,13 +3,13 @@ services:
     image: postgres:16
     container_name: sena-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-mydatabase}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - '${POSTGRES_PORT}:5432'
     restart: unless-stopped
   sena-chat-history:
     image: redis:latest
@@ -18,7 +18,7 @@ services:
       - '6379:6379'
     restart: unless-stopped
     environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-password}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
       - sena-chat-history:/data
 
