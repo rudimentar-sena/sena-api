@@ -10,11 +10,13 @@ import {
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiTokenGuard } from 'src/guards/register.guard';
+import { Public } from 'src/decorators/is-public.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @UseGuards(ApiTokenGuard)
   @Post('signup')
   async signUp(@Body() createUserDto: CreateUserDto) {
