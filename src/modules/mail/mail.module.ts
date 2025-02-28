@@ -7,5 +7,6 @@ import { LoggerModule } from '../logger/logger.module';
   imports: [LoggerModule],
   controllers: [MailController],
   providers: [MailService],
+  exports: [MailService],
 })
 export class MailModule { }

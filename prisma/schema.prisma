@@ -62,7 +62,7 @@ enum ChatInterviewSimulationStatus {
 model ChatInterviewSimulation {
   id             Int    @id @default(autoincrement())
   interviewCode  String @unique @map("interview_code")
-  interviewToken String @unique @map("interview_token")
+  interviewToken String? @unique @map("interview_token")
 
   title           String
   description     String?

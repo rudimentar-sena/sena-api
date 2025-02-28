@@ -78,7 +78,9 @@ export class AuthService {
       });
       await this.cognito.send(deleteCommand);
     } catch (error) {
-      this.logger.error(`Failed to delete Cognito user ${username}: ${error.message}`);
+      this.logger.error(
+        `Failed to delete Cognito user ${username}: ${error.message}`,
+      );
     }
   }
 
@@ -91,7 +93,6 @@ export class AuthService {
     let cognitoUserId: string;
 
     try {
-
       const command = new SignUpCommand({
         ClientId: this.clientId,
         Username: email,
@@ -105,8 +106,13 @@ export class AuthService {
       });
 
       const response = await this.cognito.send(command);
+      await this.cognito.send(
+        new AdminConfirmSignUpCommand({
+          UserPoolId: this.userPoolId,
+          Username: email,
+        }),
+      );
       cognitoUserId = response.UserSub;
-
 
       try {
         await this.authRepository.createUser({
@@ -114,7 +120,9 @@ export class AuthService {
           cognitoId: cognitoUserId,
         });
       } catch (dbError) {
-        this.logger.error(`Database error during user creation: ${dbError.message}`);
+        this.logger.error(
+          `Database error during user creation: ${dbError.message}`,
+        );
         await this.deleteCognitoUser(email);
         throw new Error('Failed to create user in database');
       }
@@ -165,12 +173,11 @@ export class AuthService {
       }
 
       const apiToken = this.generateApiToken({
-        userId: response.AuthenticationResult.AccessToken,
+        userId: user.id,
         email,
         companyId: user.companyId,
         role: user.role,
       });
-
       return {
         accessToken: apiToken,
       };

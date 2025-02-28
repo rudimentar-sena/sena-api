@@ -1,42 +1,36 @@
 import {
+  Injectable,
   CanActivate,
   ExecutionContext,
-  Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { PrismaService } from 'src/modules/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { LoggerService } from 'src/modules/logger/logger.service';
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class InterviewGuard implements CanActivate {
   constructor(
-    private readonly jwtService: JwtService,
-    private readonly logger: LoggerService,
+    private prisma: PrismaService,
+    private jwtService: JwtService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     try {
       const request = context.switchToHttp().getRequest();
       const authorization = request.headers.authorization;
-
-      if (!authorization) {
+      if (!authorization || !authorization.startsWith('Bearer ')) {
         throw new UnauthorizedException('Unauthorized');
       }
-      const token = authorization.split(' ')[1];
-      if (!token) {
+      const interviewToken = authorization.split(' ')[1];
+      console.log(interviewToken);
+
+      if (!interviewToken) {
         throw new UnauthorizedException('Unauthorized');
       }
-      const data = this.jwtService.verify(token);
-      const simpleUser = {
-        companyId: data.companyId,
-        email: data.email,
-        role: data.role,
-        id: data.sub,
-      };
-      request.user = simpleUser;
-
+      this.jwtService.verify(interviewToken, {
+        secret: process.env.JWT_SECRET,
+      });
       return true;
     } catch (error) {
-      this.logger.error('AuthGuard Error', error);
       throw new UnauthorizedException('Unauthorized');
     }
   }

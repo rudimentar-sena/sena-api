@@ -9,15 +9,13 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { ApiTokenGuard } from 'src/guards/register.guard';
-import { Public } from 'src/decorators/is-public.decorator';
+import { RegisterGuard } from 'src/guards/register.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Public()
-  @UseGuards(ApiTokenGuard)
+  @UseGuards(RegisterGuard)
   @Post('signup')
   async signUp(@Body() createUserDto: CreateUserDto) {
     return this.authService.signUp(createUserDto);
@@ -25,6 +23,7 @@ export class AuthController {
 
   @Post('signin')
   async signIn(@Headers('authorization') authorization: string) {
+    console.log('authorization', authorization);
     if (!authorization) {
       throw new UnauthorizedException('Unauthorized');
     }

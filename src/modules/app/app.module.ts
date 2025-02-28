@@ -10,14 +10,15 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '../prisma/prisma.module';
 import { MailModule } from '../mail/mail.module';
 import { AuthGuard } from 'src/guards/auth.guard';
-
+import { ChatSimulationModule } from '../chat-simulation/chat-simulation.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
     RequestContextModule,
     AuthModule,
     PrismaModule,
-    MailModule
+    MailModule,
+    ChatSimulationModule,
   ],
   controllers: [AppController],
   providers: [
@@ -27,10 +28,6 @@ import { AuthGuard } from 'src/guards/auth.guard';
       provide: APP_INTERCEPTOR,
       useClass: RequestInterceptor,
     },
-    {
-      provide: APP_GUARD,
-      useClass: AuthGuard,
-    },
   ],
 })
-export class AppModule { }
+export class AppModule {}
