@@ -1,10 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ChatSimulationRepository } from '../chat-simulation.repository.interface';
-import { CreateChatSimulationDto } from '../dto/create-chat-simulation.dto';
+import { CreateChatSimulationDto } from '../dto/chat-simulation.dtos';
 import { PrismaService } from 'src/modules/prisma/prisma.service';
-import { v4 as uuidv4 } from 'uuid';
 import { LoggerService } from 'src/modules/logger/logger.service';
-import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class ChatSimulationPrismaRepository
   implements ChatSimulationRepository
@@ -12,26 +10,16 @@ export class ChatSimulationPrismaRepository
   constructor(
     private prisma: PrismaService,
     private logger: LoggerService,
-    private jwtService: JwtService,
   ) {}
 
   async createChatSimulation(chatSimulation: CreateChatSimulationDto) {
     try {
-      const interviewCode = uuidv4();
-      const interviewCodeJwt = this.jwtService.sign({ interviewCode }, { expiresIn: '1h' });
-      chatSimulation.interviewCode = interviewCodeJwt;
-      console.log(chatSimulation.interviewCode);
-      const interviewToken = uuidv4();
-      const interviewTokenJwt = this.jwtService.sign({ interviewToken }, { expiresIn: '30d' });
-      chatSimulation.interviewToken = interviewTokenJwt;
-      console.log(chatSimulation);
       const simulation = await this.prisma.chatInterviewSimulation.create({
         data: {
           title: chatSimulation.title,
           description: chatSimulation.description,
           targetUserEmail: chatSimulation.targetUserEmail,
           interviewCode: chatSimulation.interviewCode,
-          interviewToken: chatSimulation.interviewToken,
           company: {
             connect: {
               id: chatSimulation.companyId
@@ -74,7 +62,7 @@ export class ChatSimulationPrismaRepository
     }
   }
 
-  async findChatSimulationById(id: number) {
+  async findChatSimulationById(id: string) {
     try {
       return this.prisma.chatInterviewSimulation.findUnique({
         where: {
@@ -110,10 +98,9 @@ export class ChatSimulationPrismaRepository
       }
       return simulation;
     } catch (error) {
-      this.logger.error(
-        'Error finding chat simulation by interview code',
-        error,
-      );
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new HttpException(
         'Error finding chat simulation by interview code',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -121,35 +108,19 @@ export class ChatSimulationPrismaRepository
     }
   }
 
-  async updateChatSimulationStatus(interviewCode: string) {
+  async updateChatSimulationStatus(data: {interviewCode: string, interviewToken: string}) {
     try {
-      return this.prisma.chatInterviewSimulation.update({
-        where: { interviewCode },
-        data: { status: 'IN_PROGRESS' },
+      const simulation = await this.prisma.chatInterviewSimulation.update({
+        where: { interviewCode: data.interviewCode },
+        data: { status: 'IN_PROGRESS', interviewToken: data.interviewToken },
       });
+      return simulation;
     } catch (error) {
       this.logger.error('Error updating chat simulation status', error);
       throw new HttpException(
         'Error updating chat simulation status',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
-    }
-  }
-
-  async getChatSimulation(id: number) {
-    try {
-      console.log(id);
-      const simulation = await this.prisma.chatInterviewSimulation.findUnique({ 
-        where: { id: id },
-      });
-      if (!simulation) {
-        this.logger.error('Simulation not found', id);
-        throw new HttpException('Simulation not found', HttpStatus.NOT_FOUND);
-      }
-      return simulation;
-    } catch (error) {
-      this.logger.error('Error getting chat simulation', error);
-      throw new HttpException('Error getting chat simulation', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

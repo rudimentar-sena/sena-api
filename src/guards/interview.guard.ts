@@ -4,14 +4,10 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/modules/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class InterviewGuard implements CanActivate {
-  constructor(
-    private prisma: PrismaService,
-    private jwtService: JwtService,
-  ) {}
+  constructor(private readonly jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     try {
@@ -20,15 +16,13 @@ export class InterviewGuard implements CanActivate {
       if (!authorization || !authorization.startsWith('Bearer ')) {
         throw new UnauthorizedException('Unauthorized');
       }
+
       const interviewToken = authorization.split(' ')[1];
-      console.log(interviewToken);
 
       if (!interviewToken) {
         throw new UnauthorizedException('Unauthorized');
       }
-      this.jwtService.verify(interviewToken, {
-        secret: process.env.JWT_SECRET,
-      });
+      this.jwtService.verify(interviewToken);
       return true;
     } catch (error) {
       throw new UnauthorizedException('Unauthorized');

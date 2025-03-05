@@ -6,10 +6,9 @@ import {
   UseGuards,
   Request,
   Param,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { ChatSimulationService } from './chat-simulation.service';
-import { CreateChatSimulationDto } from './dto/create-chat-simulation.dto';
+import { CreateChatSimulationDto, MessageDto } from './dto/chat-simulation.dtos';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { InterviewGuard } from 'src/guards/interview.guard';
 
@@ -37,17 +36,23 @@ export class ChatSimulationController {
   }
   @UseGuards(AuthGuard)
   @Get(':id')
-  async getSimulationById(@Param('id') id: number) {
+  async getSimulationById(@Param('id') id: string) {
     return this.chatSimulationService.getSimulationById(id);
   }
 
-  @Post('/start')
-  async startSimulation(@Body() interviewCode: string) {
+  @Post('start')
+  async startSimulation(@Body('interviewCode') interviewCode: string) {
     return this.chatSimulationService.startSimulation(interviewCode);
   }
+
   @UseGuards(InterviewGuard)
-  @Get('chat/:id')
-  async getChatSimulation(@Param('id', ParseIntPipe) id: number) {  
-    return this.chatSimulationService.getChatSimulation(id);
+  @Post('/chat')
+  async sendMessage(@Body() dto: MessageDto) {
+    return this.chatSimulationService.sendMessage(dto);
+  }
+  @UseGuards(InterviewGuard)
+  @Get('/chat/:id')
+  async getMessages(@Param('id') id: string) {
+    return this.chatSimulationService.getMessages(id);
   }
 }

@@ -21,6 +21,24 @@ export class CreateChatSimulationDto {
   creatorId: number;
   @IsString()
   interviewCode: string;
+}
+
+export class MessageDto {
   @IsString()
-  interviewToken: string;
+  message: string;
+  @IsString()
+  chatId: string;
+}
+
+export class UserDto {
+  @IsNumber()
+  id: number;
+  @IsEmail()
+  email: string;
+  @IsString()
+  name: string;
+  @IsNumber()
+  companyId: number;
+  @IsString()
+  role: string;
 }
