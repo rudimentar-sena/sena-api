@@ -1,5 +1,5 @@
 import { ChatInterviewSimulation } from '@prisma/client';
-import { CreateChatSimulationDto } from './dto/chat-simulation.dtos';
+import { CreateChatSimulationDto, UpdateSimulationDto } from './dto/chat-simulation.dtos';
 
 export abstract class ChatSimulationRepository {
   abstract createChatSimulation(
@@ -10,4 +10,5 @@ export abstract class ChatSimulationRepository {
   abstract findChatSimulationById(id: string): Promise<ChatInterviewSimulation>;
   abstract findChatSimulationByInterviewCode(interviewCode: string): Promise<ChatInterviewSimulation>;
   abstract updateChatSimulationStatus(data: {interviewCode: string, interviewToken: string}): Promise<ChatInterviewSimulation>;
+  abstract updateSimulation(dto: UpdateSimulationDto, companyId: number): Promise<ChatInterviewSimulation>;
 }

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ChatSimulationRepository } from '../chat-simulation.repository.interface';
-import { CreateChatSimulationDto } from '../dto/chat-simulation.dtos';
+import { CreateChatSimulationDto, UpdateSimulationDto } from '../dto/chat-simulation.dtos';
 import { PrismaService } from 'src/modules/prisma/prisma.service';
 import { LoggerService } from 'src/modules/logger/logger.service';
 @Injectable()
@@ -119,6 +119,46 @@ export class ChatSimulationPrismaRepository
       this.logger.error('Error updating chat simulation status', error);
       throw new HttpException(
         'Error updating chat simulation status',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateSimulation(dto: UpdateSimulationDto, companyId: number) {
+    try {
+      const simulation = await this.prisma.chatInterviewSimulation.findUnique({
+        where: { id: dto.id },
+        include: { company: true }
+      });
+
+      if (!simulation) {
+        throw new HttpException('Simulation not found', HttpStatus.NOT_FOUND);
+      }
+
+      if (simulation.companyId !== companyId) {
+        throw new HttpException('Unauthorized', HttpStatus.FORBIDDEN);
+      }
+
+      if (simulation.status !== 'PENDING') {
+        throw new HttpException('Only pending simulations can be updated', HttpStatus.BAD_REQUEST);
+      }
+
+      const updatedSimulation = await this.prisma.chatInterviewSimulation.update({
+        where: { id: dto.id },
+        data: {
+          title: dto.title,
+          description: dto.description
+        }
+      });
+
+      return updatedSimulation;
+    } catch (error) {
+      this.logger.error('Error updating simulation', error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        'Error updating simulation',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

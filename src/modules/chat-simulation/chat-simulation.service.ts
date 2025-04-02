@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoggerService } from '../logger/logger.service';
-import { CreateChatSimulationDto, MessageDto, UserDto } from './dto/chat-simulation.dtos';
+import { CreateChatSimulationDto, MessageDto, UserDto, UpdateSimulationDto } from './dto/chat-simulation.dtos';
 import { ChatSimulationRepository } from './chat-simulation.repository.interface';
 import { MailService } from '../mail/mail.service';
 import { RedisProxy } from 'src/proxies/redis.proxy';
@@ -175,6 +175,22 @@ export class ChatSimulationService {
       this.logger.error('Error getting messages', error);
       throw new HttpException(
         'Error getting messages',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateSimulation(dto: UpdateSimulationDto, user: UserDto) {
+    try {
+      const simulation = await this.chatSimulationRepository.updateSimulation(dto, user.companyId);
+      return simulation;
+    } catch (error) {
+      this.logger.error('Error updating simulation', error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        'Error updating simulation',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

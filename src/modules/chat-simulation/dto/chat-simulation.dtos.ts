@@ -42,3 +42,12 @@ export class UserDto {
   @IsString()
   role: string;
 }
+
+export class UpdateSimulationDto {
+  @IsString()
+  id: string;
+  @IsString()
+  title: string;
+  @IsString()
+  description: string;
+}

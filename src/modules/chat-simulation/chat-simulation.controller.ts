@@ -6,9 +6,10 @@ import {
   UseGuards,
   Request,
   Param,
+  Put,
 } from '@nestjs/common';
 import { ChatSimulationService } from './chat-simulation.service';
-import { CreateChatSimulationDto, MessageDto } from './dto/chat-simulation.dtos';
+import { CreateChatSimulationDto, MessageDto, UpdateSimulationDto } from './dto/chat-simulation.dtos';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { InterviewGuard } from 'src/guards/interview.guard';
 
@@ -54,5 +55,11 @@ export class ChatSimulationController {
   @Get('/chat/:id')
   async getMessages(@Param('id') id: string) {
     return this.chatSimulationService.getMessages(id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Put()
+  async updateSimulation(@Body() dto: UpdateSimulationDto, @Request() req) {
+    return this.chatSimulationService.updateSimulation(dto, req.user);
   }
 }
