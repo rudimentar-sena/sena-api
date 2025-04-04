@@ -11,6 +11,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { MailModule } from '../mail/mail.module';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { ChatSimulationModule } from '../chat-simulation/chat-simulation.module';
+import { UploadModule } from '../upload/upload.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -19,6 +20,7 @@ import { ChatSimulationModule } from '../chat-simulation/chat-simulation.module'
     PrismaModule,
     MailModule,
     ChatSimulationModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [

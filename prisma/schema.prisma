@@ -60,8 +60,8 @@ enum ChatInterviewSimulationStatus {
 }
 
 model ChatInterviewSimulation {
-  id             String    @id @default(uuid())
-  interviewCode  String @unique @map("interview_code")
+  id             String  @id @default(uuid())
+  interviewCode  String  @unique @map("interview_code")
   interviewToken String? @unique @map("interview_token")
 
   title           String
@@ -81,4 +81,13 @@ model ChatInterviewSimulation {
   company   Company @relation(fields: [companyId], references: [id])
 
   @@map("tb_chat_interview_simulations")
+}
+
+model Upload {
+  originalFileName String    @map("original_file_name")
+  hashFilename     String    @unique @map("hash_filename")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime? @updatedAt @map("updated_at")
+
+  @@map("tb_uploads")
 }
